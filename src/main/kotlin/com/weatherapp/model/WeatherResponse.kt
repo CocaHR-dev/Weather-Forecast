@@ -12,12 +12,17 @@ data class Forecast(
 
 data class ForecastDay(
     @SerializedName("date") val date: String,
-    @SerializedName("day") val day: Day
+    @SerializedName("day") val day: Day,
+    @SerializedName("hour") val hour: List<Hour>
 )
 
 data class Day(
     @SerializedName("mintemp_c") val minTempC: Double,
-    @SerializedName("maxtemp_c") val maxTempC: Double,
-    @SerializedName("avghumidity") val avgHumidity: Double,
-    @SerializedName("maxwind_kph") val maxWindKph: Double
+    @SerializedName("maxtemp_c") val maxTempC: Double
+)
+
+data class Hour(
+    @SerializedName("humidity") val humidity: Double,
+    @SerializedName("wind_kph") val windSpeed: Double,
+    @SerializedName("wind_dir") val windDir: String,
 )
