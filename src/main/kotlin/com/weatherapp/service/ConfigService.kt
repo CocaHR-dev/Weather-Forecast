@@ -2,7 +2,6 @@ package com.weatherapp.service
 
 import com.google.gson.Gson
 import com.weatherapp.model.Config
-import java.io.File
 
 class ConfigService(private val resourceName: String = "appsettings.json") {
 
