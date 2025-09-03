@@ -1,14 +1,26 @@
 package com.weatherapp.api
 
-import com.google.gson.GsonBuilder
 import com.weatherapp.model.WeatherResponse
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import com.google.gson.GsonBuilder
 
+/**
+ * Retrofit API interface for WeatherAPI.com.
+ * Only this package knows about Retrofit, keeping the rest of the code clean.
+ */
 interface WeatherApiService {
+
+    /**
+     * Fetch weather forecast for a city.
+     * @param apiKey API key for authentication
+     * @param city City name
+     * @param days Number of forecast days
+     * @return Call wrapping WeatherResponse
+     */
     @GET("v1/forecast.json")
     fun getForecast(
         @Query("key") apiKey: String,
@@ -20,14 +32,13 @@ interface WeatherApiService {
 
     companion object {
         /**
-         * Factory to provide a default Retrofit implementation
+         * Factory to create a real API service instance.
          */
-        fun create(baseUrl: String = "https://api.weatherapi.com/"): WeatherApiService {
+        fun create(): WeatherApiService {
             val retrofit = Retrofit.Builder()
-                .baseUrl(baseUrl)
+                .baseUrl("https://api.weatherapi.com/")
                 .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
                 .build()
-
             return retrofit.create(WeatherApiService::class.java)
         }
     }

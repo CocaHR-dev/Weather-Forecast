@@ -5,7 +5,7 @@ import com.weatherapp.model.WeatherResponse
 
 /**
  * Service responsible for fetching weather data.
- * Fully decoupled from Retrofit; depends only on WeatherApiService interface.
+ * Uses dependency injection to receive the WeatherApiService.
  */
 class WeatherFetcher(private val apiService: WeatherApiService) {
 
@@ -19,6 +19,15 @@ class WeatherFetcher(private val apiService: WeatherApiService) {
      */
     fun getForecast(city: String, apiKey: String, days: Int): WeatherResponse? {
         val response = apiService.getForecast(apiKey, city, days).execute()
-        return if (response.isSuccessful) response.body() else null
+        return if (response.isSuccessful) {response.body()} else null
+    }
+
+    companion object {
+        /**
+         * Provides a default instance of WeatherFetcher with a real API service.
+         */
+        fun createDefault(): WeatherFetcher {
+            return WeatherFetcher(WeatherApiService.create())
+        }
     }
 }

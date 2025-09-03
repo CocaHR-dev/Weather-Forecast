@@ -2,40 +2,39 @@ package com.weatherapp.service
 
 import com.google.gson.Gson
 import com.weatherapp.model.Config
-import java.io.InputStream
 
 /**
- * Service responsible for loading application configuration.
- * Uses dependency injection for resource stream, making it testable.
+ * Service responsible for loading configuration from a JSON resource.
+ * Supports environment variable override for the API key.
  */
-class ConfigService(private val configStreamProvider: () -> InputStream?) {
+class ConfigService(private val resourceName: String = "appsettings.json") {
 
     /**
-     * Load configuration from the provided stream.
-     * Throws IllegalStateException if config is missing or invalid.
+     * Loads configuration and validates it.
+     * @throws IllegalStateException if the resource is missing or API key is blank
+     * @throws IllegalArgumentException if startDay > endDay
      */
     fun loadConfig(): Config {
-        val stream = configStreamProvider()
-            ?: throw IllegalStateException("Configuration resource not found")
+        val stream = javaClass.classLoader.getResourceAsStream(resourceName)
+            ?: throw IllegalStateException("Configuration resource not found: $resourceName")
 
         val config = Gson().fromJson(stream.reader(), Config::class.java)
+
+        // Use environment variable if present
         val apiKey = System.getenv("WEATHER_API_KEY") ?: config.apiKey
 
-        if (apiKey.isBlank()) {
-            throw IllegalStateException("API key not set in environment or config")
+        if (apiKey.isBlank()) throw IllegalStateException("API key not set in environment or config")
+
+        if (config.targetDayRangeStart > config.targetDayRangeEnd) {
+            throw IllegalArgumentException(
+                "Invalid day range: start (${config.targetDayRangeStart}) > end (${config.targetDayRangeEnd})"
+            )
         }
 
         return config.copy(apiKey = apiKey)
     }
 
     companion object {
-        /**
-         * Default production instance reading appsettings.json from resources
-         */
-        fun default(): ConfigService {
-            return ConfigService {
-                ConfigService::class.java.classLoader.getResourceAsStream("appsettings.json")
-            }
-        }
+        fun default() = ConfigService()
     }
 }
