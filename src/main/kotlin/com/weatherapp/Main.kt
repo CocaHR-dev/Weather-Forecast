@@ -1,32 +1,34 @@
 package com.weatherapp
 
-import com.weatherapp.api.WeatherApiService
 import com.weatherapp.service.ConfigService
 import com.weatherapp.service.WeatherFetcher
 import com.weatherapp.service.WeatherReportService
 
+/**
+ * Main entry point for the Weather Report Application.
+ */
 fun main() {
-    // Load config (supports environment variable override)
-    val configService = ConfigService.default()
-    val config = configService.loadConfig()
+    try {
+        // Load config
+        val configService = ConfigService.default()
+        val config = configService.loadConfig()
 
-    // Create API service (Retrofit encapsulated)
-    val apiService = WeatherApiService.create()
+        // Create fetcher and report service
+        val fetcher = WeatherFetcher.createDefault()
+        val reportService = WeatherReportService(fetcher)
 
-    // Inject API service into fetcher
-    val fetcher = WeatherFetcher(apiService)
+        // Generate full report for the configured day range
+        val report = reportService.generateReports(
+            apiKey = config.apiKey,
+            cities = config.cities,
+            startDay = config.targetDayRangeStart,
+            endDay = config.targetDayRangeEnd
+        )
 
-    // Inject fetcher into report service
-    val reportService = WeatherReportService(fetcher)
+        // Print the formatted tables
+        println(report)
 
-    // Generate the full report for the configured date range
-    val report = reportService.generateReport(
-        apiKey = config.apiKey,
-        cities = config.cities,
-        startDay = config.targetDayRangeStart,
-        endDay = config.targetDayRangeEnd
-    )
-
-    // Print the report (tables are automatically captioned by date)
-    println(report)
+    } catch (e: Exception) {
+        println("An error occurred: ${e.message}")
+    }
 }
