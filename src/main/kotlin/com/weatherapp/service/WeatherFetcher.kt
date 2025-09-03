@@ -1,26 +1,24 @@
 package com.weatherapp.service
 
-import com.google.gson.GsonBuilder
 import com.weatherapp.api.WeatherApiService
 import com.weatherapp.model.WeatherResponse
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class WeatherFetcher(apiBaseUrl: String = "https://api.weatherapi.com/") {
+/**
+ * Service responsible for fetching weather data.
+ * Fully decoupled from Retrofit; depends only on WeatherApiService interface.
+ */
+class WeatherFetcher(private val apiService: WeatherApiService) {
 
-    private val service: WeatherApiService
-
-    init {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(apiBaseUrl)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-
-        service = retrofit.create(WeatherApiService::class.java)
-    }
-
-    fun getNextDayForecast(city: String, apiKey: String): WeatherResponse? {
-        val response = service.getTomorrowForecast(apiKey, city).execute()
+    /**
+     * Fetch forecast for a city.
+     *
+     * @param city the city name
+     * @param apiKey WeatherAPI key
+     * @param days number of days to fetch
+     * @return WeatherResponse or null if the call fails
+     */
+    fun getForecast(city: String, apiKey: String, days: Int): WeatherResponse? {
+        val response = apiService.getForecast(apiKey, city, days).execute()
         return if (response.isSuccessful) response.body() else null
     }
 }

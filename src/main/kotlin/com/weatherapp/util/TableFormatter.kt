@@ -7,15 +7,12 @@ fun formatTable(headers: List<String>, rows: List<List<String>>): String {
 
     val sb = StringBuilder()
 
-    // Header
     headers.forEachIndexed { i, h -> sb.append(h.padEnd(colWidths[i] + 2)) }
     sb.append("\n")
 
-    // Separator
     colWidths.forEach { sb.append("-".repeat(it + 2)) }
     sb.append("\n")
 
-    // Rows
     rows.forEach { row ->
         row.forEachIndexed { i, cell ->
             sb.append(cell.padEnd(colWidths[i] + 2))
